@@ -34,7 +34,10 @@ describe('buildMyConnectedAccountsWhere', () => {
 
   it.each([
     ['a null filter', null],
-    ['explicit null fields', { isOwnedByCaller: null, appConnectionScope: null }],
+    [
+      'explicit null fields',
+      { isOwnedByCaller: null, appConnectionScope: null },
+    ],
     ['isOwnedByCaller false', { isOwnedByCaller: false }],
   ])('matches like no filter with %s', (_, filter) => {
     expect(
