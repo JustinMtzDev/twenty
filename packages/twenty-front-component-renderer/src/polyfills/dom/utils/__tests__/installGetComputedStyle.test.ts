@@ -130,6 +130,33 @@ describe('installGetComputedStyle', () => {
     expect(geometryStore.resolveElementSnapshot).not.toHaveBeenCalled();
   });
 
+  it('should enroll a container whose child element is already measured', () => {
+    const globalScope: Record<string, unknown> = {};
+    const measuredChild = { nodeType: 1 };
+    const container = {
+      childNodes: [{ nodeType: 3 }, measuredChild],
+      style: { getPropertyValue: () => '0px' },
+    };
+    const geometryStore = createWorkerGeometryStoreStub({
+      isElementMeasured: jest.fn((element) => element === measuredChild),
+      resolveElementSnapshot: jest.fn(() =>
+        createElementGeometrySnapshotFixture({
+          computedStyle: { 'column-gap': '4px' },
+        }),
+      ),
+    });
+    installGetComputedStyle({ globalScope, geometryStore });
+
+    const style = (globalScope.getComputedStyle as GetComputedStyleLike)(
+      container,
+    );
+
+    expect(style.getPropertyValue('column-gap')).toBe('4px');
+    expect(geometryStore.resolveElementSnapshot).toHaveBeenCalledWith(
+      container,
+    );
+  });
+
   it('should keep Object.prototype members callable on the declaration', () => {
     const globalScope: Record<string, unknown> = {};
     installGetComputedStyle({
@@ -144,5 +171,26 @@ describe('installGetComputedStyle', () => {
     expect(() => `${style}`).not.toThrow();
     expect(style.hasOwnProperty('display')).toBe(false);
     expect(style.getPropertyValue('constructor')).toBe('');
+  });
+
+  it('should not read inherited members of a measured style as property values', () => {
+    const globalScope: Record<string, unknown> = {};
+    installGetComputedStyle({
+      globalScope,
+      geometryStore: createWorkerGeometryStoreStub({
+        readObservedElementSnapshot: () =>
+          createElementGeometrySnapshotFixture({
+            computedStyle: { display: 'flex' },
+          }),
+      }),
+    });
+
+    const style = (globalScope.getComputedStyle as GetComputedStyleLike)({
+      style: createStyleProxy(() => {}),
+    });
+
+    expect(style.getPropertyValue('display')).toBe('flex');
+    expect(style.getPropertyValue('constructor')).toBe('');
+    expect(style.getPropertyValue('__proto__')).toBe('');
   });
 });

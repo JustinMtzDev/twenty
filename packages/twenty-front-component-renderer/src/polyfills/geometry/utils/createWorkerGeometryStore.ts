@@ -5,10 +5,10 @@ import { MAX_OBSERVED_GEOMETRY_ELEMENTS } from '@/constants/MaxObservedGeometryE
 import { type NodeLike } from '@/polyfills/dom/types/NodeLike';
 import { GEOMETRY_OBSERVATION_LIMIT_WARNING } from '@/polyfills/geometry/constants/GeometryObservationLimitWarning';
 import { GEOMETRY_TRANSPORT_FAILURE_WARNING } from '@/polyfills/geometry/constants/GeometryTransportFailureWarning';
-import { type ElementGeometryReader } from '@/polyfills/geometry/types/ElementGeometryReader';
 import { type GeometryObservationTransport } from '@/polyfills/geometry/types/GeometryObservationTransport';
 import { type WorkerGeometryStore } from '@/polyfills/geometry/types/WorkerGeometryStore';
 import { createDocumentScopedElementGeometrySnapshot } from '@/polyfills/geometry/utils/createDocumentScopedElementGeometrySnapshot';
+import { createElementGeometryOwnerships } from '@/polyfills/geometry/utils/createElementGeometryOwnerships';
 import { isElementUnderRemoteRoot } from '@/polyfills/geometry/utils/isElementUnderRemoteRoot';
 import { isHostRenderedElement } from '@/polyfills/geometry/utils/isHostRenderedElement';
 import { restoreUnchangedComputedStyle } from '@/polyfills/geometry/utils/restoreUnchangedComputedStyle';
@@ -16,21 +16,13 @@ import { type ElementGeometrySnapshot } from '@/types/ElementGeometrySnapshot';
 import { type GeometryUpdateBatch } from '@/types/GeometryUpdateBatch';
 import { type ViewportGeometrySnapshot } from '@/types/ViewportGeometrySnapshot';
 
-type ElementGeometryOwnership = {
-  remoteElementId: string | null;
-  readerCount: number;
-  hasDirectReader: boolean;
-  hasScheduledRelease: boolean;
-};
-
 export const createWorkerGeometryStore = (): WorkerGeometryStore => {
   const elementSnapshots = new Map<string, ElementGeometrySnapshot>();
-  const elementOwnerships = new WeakMap<object, ElementGeometryOwnership>();
   const observedRemoteElementIds = new Set<string>();
   const pendingObservationIds = new Set<string>();
   const geometryUpdateListeners = new Set<() => void>();
 
-  let rootElement: object | null = null;
+  let rootElement: NodeLike | null = null;
   let transport: GeometryObservationTransport | null = null;
   let viewportSnapshot: ViewportGeometrySnapshot | null = null;
   let hasScheduledObservationFlush = false;
@@ -110,119 +102,7 @@ export const createWorkerGeometryStore = (): WorkerGeometryStore => {
     return remoteElementId;
   };
 
-  const getElementOwnership = (element: object): ElementGeometryOwnership => {
-    const existingOwnership = elementOwnerships.get(element);
-
-    if (isDefined(existingOwnership)) {
-      return existingOwnership;
-    }
-
-    const ownership: ElementGeometryOwnership = {
-      remoteElementId: null,
-      readerCount: 0,
-      hasDirectReader: false,
-      hasScheduledRelease: false,
-    };
-    elementOwnerships.set(element, ownership);
-
-    return ownership;
-  };
-
-  const isObservedRemoteElementId = (
-    remoteElementId: string | null | undefined,
-  ): remoteElementId is string =>
-    isDefined(remoteElementId) && observedRemoteElementIds.has(remoteElementId);
-
-  const hasRemainingReader = (ownership: ElementGeometryOwnership): boolean =>
-    ownership.hasDirectReader || ownership.readerCount > 0;
-
-  const isDocumentScopedElement = (element: object): boolean =>
-    isDefined(rootElement) &&
-    (element === rootElement ||
-      element === (rootElement as NodeLike).parentNode);
-
-  const readDocumentScopedSnapshot = (
-    element: object,
-  ): ElementGeometrySnapshot | null =>
-    isDefined(viewportSnapshot)
-      ? createDocumentScopedElementGeometrySnapshot({
-          viewport: viewportSnapshot,
-          isDocumentElement: element !== rootElement,
-        })
-      : null;
-
-  const resolveSnapshot = ({
-    element,
-    ownership,
-  }: {
-    element: object;
-    ownership: ElementGeometryOwnership;
-  }): ElementGeometrySnapshot | null => {
-    if (isDocumentScopedElement(element)) {
-      return readDocumentScopedSnapshot(element);
-    }
-
-    const enrolledRemoteElementId = ownership.remoteElementId;
-
-    if (isObservedRemoteElementId(enrolledRemoteElementId)) {
-      return elementSnapshots.get(enrolledRemoteElementId) ?? null;
-    }
-
-    if (
-      !isElementUnderRemoteRoot(element, rootElement) ||
-      !isHostRenderedElement(element)
-    ) {
-      return null;
-    }
-
-    const remoteElementId = enrollElement(element);
-    ownership.remoteElementId = remoteElementId;
-
-    if (!isDefined(remoteElementId)) {
-      return null;
-    }
-
-    return elementSnapshots.get(remoteElementId) ?? null;
-  };
-
-  const resolveElementSnapshot = (
-    element: object,
-  ): ElementGeometrySnapshot | null => {
-    const ownership = getElementOwnership(element);
-    const snapshot = resolveSnapshot({ element, ownership });
-
-    if (isDefined(ownership.remoteElementId)) {
-      ownership.hasDirectReader = true;
-    }
-
-    return snapshot;
-  };
-
-  const readObservedElementSnapshot = (
-    element: object,
-  ): ElementGeometrySnapshot | null => {
-    if (isDocumentScopedElement(element)) {
-      return readDocumentScopedSnapshot(element);
-    }
-
-    const remoteElementId = elementOwnerships.get(element)?.remoteElementId;
-
-    return isObservedRemoteElementId(remoteElementId)
-      ? (elementSnapshots.get(remoteElementId) ?? null)
-      : null;
-  };
-
-  const releaseElementGeometryWhenUnused = (
-    ownership: ElementGeometryOwnership,
-  ): void => {
-    ownership.hasScheduledRelease = false;
-    const remoteElementId = ownership.remoteElementId;
-
-    if (hasRemainingReader(ownership) || !isDefined(remoteElementId)) {
-      return;
-    }
-
-    ownership.remoteElementId = null;
+  const releaseRemoteElement = (remoteElementId: string): void => {
     elementSnapshots.delete(remoteElementId);
     const wasPending = pendingObservationIds.delete(remoteElementId);
     const wasAtObservationLimit =
@@ -242,51 +122,83 @@ export const createWorkerGeometryStore = (): WorkerGeometryStore => {
       .catch(warnAboutTransportFailure);
   };
 
-  const createElementGeometryReader = (
+  const elementGeometryOwnerships = createElementGeometryOwnerships({
+    isObservedRemoteElementId: (remoteElementId) =>
+      observedRemoteElementIds.has(remoteElementId),
+    isPendingObservation: (remoteElementId) =>
+      pendingObservationIds.has(remoteElementId),
+    releaseRemoteElement,
+  });
+
+  const isDocumentScopedElement = (element: object): boolean =>
+    isDefined(rootElement) &&
+    (element === rootElement || element === rootElement.parentNode);
+
+  const readDocumentScopedSnapshot = (
     element: object,
-  ): ElementGeometryReader => {
-    const ownership = getElementOwnership(element);
-    const elementRef = new WeakRef(element);
-    ownership.readerCount += 1;
-    let isReleased = false;
+  ): ElementGeometrySnapshot | null =>
+    isDefined(viewportSnapshot)
+      ? createDocumentScopedElementGeometrySnapshot({
+          viewport: viewportSnapshot,
+          isDocumentElement: element !== rootElement,
+        })
+      : null;
 
-    return {
-      read: () => {
-        const currentElement = elementRef.deref();
+  const readElementSnapshot = (
+    remoteElementId: string | null,
+  ): ElementGeometrySnapshot | null =>
+    isDefined(remoteElementId)
+      ? (elementSnapshots.get(remoteElementId) ?? null)
+      : null;
 
-        if (isReleased || !isDefined(currentElement)) {
-          return null;
-        }
+  const resolveSnapshot = (element: object): ElementGeometrySnapshot | null => {
+    if (isDocumentScopedElement(element)) {
+      return readDocumentScopedSnapshot(element);
+    }
 
-        return resolveSnapshot({ element: currentElement, ownership });
-      },
-      release: () => {
-        if (isReleased) {
-          return;
-        }
+    const observedRemoteElementId =
+      elementGeometryOwnerships.readObservedRemoteElementId(element);
 
-        isReleased = true;
-        ownership.readerCount -= 1;
-        const remoteElementId = ownership.remoteElementId;
+    if (isDefined(observedRemoteElementId)) {
+      return readElementSnapshot(observedRemoteElementId);
+    }
 
-        if (hasRemainingReader(ownership) || !isDefined(remoteElementId)) {
-          return;
-        }
+    if (
+      !isElementUnderRemoteRoot(element, rootElement) ||
+      !isHostRenderedElement(element)
+    ) {
+      return null;
+    }
 
-        if (pendingObservationIds.has(remoteElementId)) {
-          releaseElementGeometryWhenUnused(ownership);
-          return;
-        }
+    const remoteElementId = enrollElement(element);
+    elementGeometryOwnerships.assignRemoteElementId({
+      element,
+      remoteElementId,
+    });
 
-        if (ownership.hasScheduledRelease) {
-          return;
-        }
-
-        ownership.hasScheduledRelease = true;
-        queueMicrotask(() => releaseElementGeometryWhenUnused(ownership));
-      },
-    };
+    return readElementSnapshot(remoteElementId);
   };
+
+  const resolveElementSnapshot = (
+    element: object,
+  ): ElementGeometrySnapshot | null => {
+    const snapshot = resolveSnapshot(element);
+    elementGeometryOwnerships.markDirectReader(element);
+
+    return snapshot;
+  };
+
+  const readObservedElementSnapshot = (
+    element: object,
+  ): ElementGeometrySnapshot | null =>
+    isDocumentScopedElement(element)
+      ? readDocumentScopedSnapshot(element)
+      : readElementSnapshot(
+          elementGeometryOwnerships.readObservedRemoteElementId(element),
+        );
+
+  const isElementMeasured = (element: object): boolean =>
+    isDefined(elementGeometryOwnerships.readObservedRemoteElementId(element));
 
   const applyGeometryBatch = (batch: GeometryUpdateBatch): void => {
     if (isDefined(batch.viewport)) {
@@ -353,6 +265,11 @@ export const createWorkerGeometryStore = (): WorkerGeometryStore => {
     },
     resolveElementSnapshot,
     readObservedElementSnapshot,
-    createElementGeometryReader,
+    isElementMeasured,
+    createElementGeometryReader: (element: object) =>
+      elementGeometryOwnerships.createElementGeometryReader({
+        element,
+        readSnapshot: resolveSnapshot,
+      }),
   };
 };

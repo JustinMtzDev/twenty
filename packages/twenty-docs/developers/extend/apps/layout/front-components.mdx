@@ -142,7 +142,7 @@ The menu item points at the front component rather than the component declaring 
 
 Each item renders as a tab on the app's page under **Settings > Apps**, after **General**, in `position` order.
 
-Declare as many as you need. Twenty's own **General** item — auto-upgrade, App URL and connections — always comes first and cannot be overridden by an app; App URL only shows with **Advanced mode** on.
+Declare as many as you need. Twenty's own **General** item — auto-upgrade, App URL and connections — always comes first and cannot be overridden by an app; App URL only shows when the app has HTTP-triggered functions.
 
 ### Fields
 
@@ -1009,7 +1009,7 @@ Elements can measure themselves: the host mirrors geometry into the sandbox, so 
 | `getClientRects()`                                                                       | Throws                                                                                                           |
 | `window.matchMedia()`                                                                    | Works for a fixed set of features, with `change` events (see below)                                              |
 | `window.innerWidth`, `innerHeight`, `devicePixelRatio`, `scrollX`, `scrollY`             | Work, reporting the **browser viewport**; your widget's own size is `document.body.clientWidth` / `clientHeight` |
-| `window.getComputedStyle()`                                                              | Host layout properties for elements you already measure; the rest, theme variables too, from inline styles       |
+| `window.getComputedStyle()`                                                              | Host layout values for measured elements and their parents; the rest, theme variables too, from inline styles    |
 | `ResizeObserver`                                                                         | Works, from the mirror; `document.body` reports your widget's box                                                |
 | `IntersectionObserver`                                                                   | `ReferenceError` (`typeof` guards do work)                                                                       |
 | `MutationObserver`                                                                       | Works, including `subtree`, `attributeFilter`, old values and `takeRecords()`                                    |

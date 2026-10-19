@@ -5,6 +5,7 @@ import { phoneCountryPickerTest } from '@/__stories__/twenty-ui-gallery/utils/ph
 import { phoneCountryPickerTriggerTest } from '@/__stories__/twenty-ui-gallery/utils/phoneCountryPickerTriggerTest';
 import { breadcrumbTest } from '@/__stories__/twenty-ui-gallery/utils/breadcrumbTest';
 import { imageInputTest } from '@/__stories__/twenty-ui-gallery/utils/imageInputTest';
+import { overflowingListApiTest } from '@/__stories__/twenty-ui-gallery/utils/overflowingListApiTest';
 import { overflowingListEventIsolationTest } from '@/__stories__/twenty-ui-gallery/utils/overflowingListEventIsolationTest';
 import { overflowingListGeometryTest } from '@/__stories__/twenty-ui-gallery/utils/overflowingListGeometryTest';
 import { overflowingListPopupTest } from '@/__stories__/twenty-ui-gallery/utils/overflowingListPopupTest';
@@ -67,6 +68,7 @@ import { radioGroupTest } from '@/__stories__/twenty-ui-gallery/utils/radioGroup
 import { segmentedControlTest } from '@/__stories__/twenty-ui-gallery/utils/segmentedControlTest';
 import { sliderRangeTest } from '@/__stories__/twenty-ui-gallery/utils/sliderRangeTest';
 import { sliderTest } from '@/__stories__/twenty-ui-gallery/utils/sliderTest';
+import { sliderHiddenEdgeThumbTest } from '@/__stories__/twenty-ui-gallery/utils/sliderHiddenEdgeThumbTest';
 import { toastTest } from '@/__stories__/twenty-ui-gallery/utils/toastTest';
 import { avatarImageTest } from '@/__stories__/twenty-ui-gallery/utils/avatarImageTest';
 import { avatarControlsTest } from '@/__stories__/twenty-ui-gallery/utils/avatarControlsTest';
@@ -514,7 +516,7 @@ export const CheckboxPreact: Story = createGalleryStory({
 export const SliderReact: Story = createGalleryStory({
   frontComponentBundleName: 'twenty-ui-slider',
   runtime: 'react',
-  play: sliderTest,
+  play: sliderHiddenEdgeThumbTest,
 });
 export const SliderPreact: Story = createGalleryStory({
   frontComponentBundleName: 'twenty-ui-slider',
@@ -699,6 +701,18 @@ export const InlineBannerPreact: Story = createGalleryStory({
   play: inlineBannerTest,
 });
 
+export const OverflowingListApiReact: Story = createGalleryStory({
+  frontComponentBundleName: 'twenty-ui-overflowing-list-api',
+  runtime: 'react',
+  play: overflowingListApiTest,
+});
+
+export const OverflowingListApiPreact: Story = createGalleryStory({
+  frontComponentBundleName: 'twenty-ui-overflowing-list-api',
+  runtime: 'preact',
+  play: overflowingListApiTest,
+});
+
 export const OverflowingListPopupReact: Story = createGalleryStory({
   frontComponentBundleName: 'twenty-ui-overflowing-list',
   runtime: 'react',
@@ -818,31 +832,6 @@ const galleryInstancesMountOnlyPlay = createMountOnlyPlay({
   testId: 'front-component-mounted',
   expectedCount: 2,
 });
-
-export const ResizeHandleGesturesReact: Story = {
-  ...ResizeHandleReact,
-  play: galleryMountOnlyPlay,
-};
-export const ResizeHandleGesturesPreact: Story = {
-  ...ResizeHandlePreact,
-  play: galleryMountOnlyPlay,
-};
-export const SliderGesturesReact: Story = {
-  ...SliderReact,
-  play: galleryMountOnlyPlay,
-};
-export const SliderGesturesPreact: Story = {
-  ...SliderPreact,
-  play: galleryMountOnlyPlay,
-};
-export const SliderRangeGesturesReact: Story = {
-  ...SliderRangeReact,
-  play: galleryMountOnlyPlay,
-};
-export const SliderRangeGesturesPreact: Story = {
-  ...SliderRangePreact,
-  play: galleryMountOnlyPlay,
-};
 
 export const PortalGeometryReact: Story = {
   ...PortalBoundsReact,

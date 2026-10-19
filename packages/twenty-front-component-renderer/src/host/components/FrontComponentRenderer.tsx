@@ -1,7 +1,5 @@
 import { ROOT_CONTAINER_STYLE } from '@/host/constants/RootContainerStyle';
 import { FrontComponentRemoteRootRenderer } from '@/host/components/FrontComponentRemoteRootRenderer';
-import { FrontComponentPointerCaptureControllerContext } from '@/host/events/contexts/FrontComponentPointerCaptureControllerContext';
-import { createHostPointerCaptureController } from '@/host/events/utils/createHostPointerCaptureController';
 import { FrontComponentGeometryTrackerContext } from '@/host/geometry/contexts/FrontComponentGeometryTrackerContext';
 import { createGeometryTracker } from '@/host/geometry/utils/createGeometryTracker';
 import { FrontComponentHostFocusControllerContext } from '@/host/focus/contexts/FrontComponentHostFocusControllerContext';
@@ -14,7 +12,6 @@ import { FrontComponentFocusTrackerEffect } from '@/host/effect-components/Front
 import { FrontComponentGeometryTrackerEffect } from '@/host/effect-components/FrontComponentGeometryTrackerEffect';
 import { FrontComponentInitializeHostCommunicationApiEffect } from '@/host/effect-components/FrontComponentInitializeHostCommunicationApiEffect';
 import { FrontComponentMediaSessionEffect } from '@/host/effect-components/FrontComponentMediaSessionEffect';
-import { FrontComponentPointerCaptureEffect } from '@/host/effect-components/FrontComponentPointerCaptureEffect';
 import { FrontComponentUpdateContextEffect } from '@/host/effect-components/FrontComponentUpdateContextEffect';
 import { FrontComponentUpdateHostCommunicationApiEffect } from '@/host/effect-components/FrontComponentUpdateHostCommunicationApiEffect';
 import { type FrontComponentMediaSessionHost } from '@/host/media/types/FrontComponentMediaSessionHost';
@@ -78,9 +75,6 @@ export const FrontComponentRenderer = ({
   const [hostFocusController] = useState(() =>
     createHostFocusController({ geometryTracker }),
   );
-  const [pointerCaptureController] = useState(() =>
-    createHostPointerCaptureController({ geometryTracker }),
-  );
   const [hostScrollController] = useState(() =>
     createHostScrollController({ geometryTracker }),
   );
@@ -103,7 +97,6 @@ export const FrontComponentRenderer = ({
           initialExecutionContext={initialExecutionContext}
           geometryTracker={geometryTracker}
           hostFocusController={hostFocusController}
-          pointerCaptureController={pointerCaptureController}
           hostScrollController={hostScrollController}
           mediaSessionHost={mediaSessionHost}
           setReceiver={setReceiver}
@@ -136,10 +129,6 @@ export const FrontComponentRenderer = ({
             <FrontComponentFocusTrackerEffect
               thread={thread}
               geometryTracker={geometryTracker}
-            />
-            <FrontComponentPointerCaptureEffect
-              thread={thread}
-              pointerCaptureController={pointerCaptureController}
             />
             {isDefined(mediaSessionHost) && (
               <FrontComponentMediaSessionEffect
@@ -175,18 +164,14 @@ export const FrontComponentRenderer = ({
               <FrontComponentHostFocusControllerContext.Provider
                 value={hostFocusController}
               >
-                <FrontComponentPointerCaptureControllerContext.Provider
-                  value={pointerCaptureController}
+                <FrontComponentHostScrollControllerContext.Provider
+                  value={hostScrollController}
                 >
-                  <FrontComponentHostScrollControllerContext.Provider
-                    value={hostScrollController}
-                  >
-                    <FrontComponentRemoteRootRenderer
-                      receiver={receiver}
-                      components={fallbackComponentRegistry}
-                    />
-                  </FrontComponentHostScrollControllerContext.Provider>
-                </FrontComponentPointerCaptureControllerContext.Provider>
+                  <FrontComponentRemoteRootRenderer
+                    receiver={receiver}
+                    components={fallbackComponentRegistry}
+                  />
+                </FrontComponentHostScrollControllerContext.Provider>
               </FrontComponentHostFocusControllerContext.Provider>
             </ErrorBoundary>
           </ThemeProvider>
