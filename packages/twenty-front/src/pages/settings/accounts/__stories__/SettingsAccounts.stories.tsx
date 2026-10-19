@@ -135,7 +135,7 @@ export const WorkspaceSharedAppConnectionsStayOff: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 
-    await canvas.findByText('Used by', undefined, { timeout: 3000 });
+    await canvas.findByText('tim@apple.dev', undefined, { timeout: 3000 });
 
     expect(myConnectedAccountsQuery).toHaveBeenCalledWith({
       filter: USER_OWNED_CONNECTED_ACCOUNTS_FILTER,
