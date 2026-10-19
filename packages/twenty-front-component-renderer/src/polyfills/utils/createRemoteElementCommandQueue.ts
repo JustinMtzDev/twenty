@@ -1,15 +1,16 @@
 import { updateRemoteElementProperty } from '@remote-dom/core/elements';
 import { isDefined } from 'twenty-shared/utils';
 
-import { acknowledgedNativeEditSequenceByRemoteElement } from '@/remote/elements/states/acknowledgedNativeEditSequenceByRemoteElement';
 import { type RemoteElementCommand } from '@/types/RemoteElementCommand';
 
 export const createRemoteElementCommandQueue = <TRequest>({
   bridgeProperty,
   maxPendingCommands = Number.POSITIVE_INFINITY,
+  readAcknowledgedNativeEditSequence,
 }: {
   bridgeProperty: string;
   maxPendingCommands?: number;
+  readAcknowledgedNativeEditSequence?: (element: object) => number | undefined;
 }) => {
   const pendingCommandsByElement = new WeakMap<
     object,
@@ -59,7 +60,7 @@ export const createRemoteElementCommandQueue = <TRequest>({
         sequence: lastCommandSequence,
         request,
         acknowledgedNativeEditSequence:
-          acknowledgedNativeEditSequenceByRemoteElement.get(element),
+          readAcknowledgedNativeEditSequence?.(element),
       },
     ];
 

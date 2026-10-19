@@ -4,6 +4,7 @@ import { type WorkerInputSelectionStore } from '@/polyfills/input-selection/type
 import { resolveOptimisticInputSelectionState } from '@/polyfills/input-selection/utils/resolveOptimisticInputSelectionState';
 import { createRemoteElementCommandQueue } from '@/polyfills/utils/createRemoteElementCommandQueue';
 import { createRemoteElementHostSubscriptions } from '@/polyfills/utils/createRemoteElementHostSubscriptions';
+import { acknowledgedNativeEditSequenceByRemoteElement } from '@/remote/elements/states/acknowledgedNativeEditSequenceByRemoteElement';
 import { type InputSelectionRequest } from '@/types/InputSelectionRequest';
 import { type InputSelectionSnapshot } from '@/types/InputSelectionSnapshot';
 import { type InputSelectionState } from '@/types/InputSelectionState';
@@ -11,7 +12,11 @@ import { type InputSelectionState } from '@/types/InputSelectionState';
 export const createWorkerInputSelectionStore =
   (): WorkerInputSelectionStore => {
     const commandQueue = createRemoteElementCommandQueue<InputSelectionRequest>(
-      { bridgeProperty: INPUT_SELECTION_BRIDGE_PROPERTIES.request },
+      {
+        bridgeProperty: INPUT_SELECTION_BRIDGE_PROPERTIES.request,
+        readAcknowledgedNativeEditSequence: (element) =>
+          acknowledgedNativeEditSequenceByRemoteElement.get(element),
+      },
     );
     const hostSelectionStates = new WeakMap<object, InputSelectionState>();
     let rootElement: object | null = null;
