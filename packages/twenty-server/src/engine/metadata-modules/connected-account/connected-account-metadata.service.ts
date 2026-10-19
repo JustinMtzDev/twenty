@@ -112,7 +112,7 @@ export class ConnectedAccountMetadataService {
   }: {
     userWorkspaceId: string;
     workspaceId: string;
-    filter?: MyConnectedAccountsFilterInput;
+    filter?: MyConnectedAccountsFilterInput | null;
   }): Promise<ConnectedAccountEntity[]> {
     const accounts = await this.repository.find({
       where: buildMyConnectedAccountsWhere({

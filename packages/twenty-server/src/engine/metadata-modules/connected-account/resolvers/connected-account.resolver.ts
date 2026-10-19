@@ -65,7 +65,7 @@ export class ConnectedAccountResolver {
       type: () => MyConnectedAccountsFilterInput,
       nullable: true,
     })
-    filter?: MyConnectedAccountsFilterInput,
+    filter?: MyConnectedAccountsFilterInput | null,
   ): Promise<ConnectedAccountPublicDTO[]> {
     const accounts =
       await this.connectedAccountMetadataService.findUsableByCaller({
