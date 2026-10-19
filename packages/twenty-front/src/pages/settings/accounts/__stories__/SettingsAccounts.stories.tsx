@@ -17,10 +17,10 @@ import { isMicrosoftCalendarEnabledState } from '@/client-config/states/isMicros
 import { isMicrosoftMessagingEnabledState } from '@/client-config/states/isMicrosoftMessagingEnabledState';
 import { jotaiStore } from '@/ui/utilities/state/jotai/jotaiStore';
 import { SettingsAccounts } from '~/pages/settings/accounts/SettingsAccounts';
-import { APP_PREFERENCES_CONNECTED_ACCOUNTS_FILTER } from '@/settings/app-preferences/constants/AppPreferencesConnectedAccountsFilter';
+import { USER_OWNED_CONNECTED_ACCOUNTS_FILTER } from '@/settings/app-preferences/constants/UserOwnedConnectedAccountsFilter';
 import {
   ACCOUNT_GROUPS_GRAPHQL_HANDLERS,
-  APP_PREFERENCES_CONNECTED_ACCOUNTS,
+  USER_OWNED_CONNECTED_ACCOUNTS,
   FATHOM_APPLICATION_ID,
   GOOGLE_ACCOUNT_ID,
   MICROSOFT_ACCOUNT_ID,
@@ -137,7 +137,7 @@ export const WorkspaceSharedAppConnectionsStayOff: Story = {
     await canvas.findByText('Used by', undefined, { timeout: 3000 });
 
     expect(myConnectedAccountsQuery).toHaveBeenCalledWith({
-      filter: APP_PREFERENCES_CONNECTED_ACCOUNTS_FILTER,
+      filter: USER_OWNED_CONNECTED_ACCOUNTS_FILTER,
     });
     expect(canvas.queryByText('sales@apple.dev')).not.toBeInTheDocument();
     expect(
@@ -249,7 +249,7 @@ export const AppsWithoutAccountShowMissingAccount: Story = {
         graphql.query('MyConnectedAccounts', () =>
           HttpResponse.json({
             data: {
-              myConnectedAccounts: APP_PREFERENCES_CONNECTED_ACCOUNTS.filter(
+              myConnectedAccounts: USER_OWNED_CONNECTED_ACCOUNTS.filter(
                 (account) =>
                   account.id !== GOOGLE_ACCOUNT_ID &&
                   account.id !== MICROSOFT_ACCOUNT_ID,

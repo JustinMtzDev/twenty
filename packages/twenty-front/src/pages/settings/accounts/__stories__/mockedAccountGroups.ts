@@ -182,7 +182,7 @@ export const CONNECTED_ACCOUNTS = [
   }),
 ];
 
-export const APP_PREFERENCES_CONNECTED_ACCOUNTS = CONNECTED_ACCOUNTS.filter(
+export const USER_OWNED_CONNECTED_ACCOUNTS = CONNECTED_ACCOUNTS.filter(
   (account) =>
     account.userWorkspaceId === MY_USER_WORKSPACE_ID &&
     !(account.provider === 'app' && account.scope === 'WORKSPACE'),
@@ -230,7 +230,7 @@ export const ACCOUNT_GROUPS_GRAPHQL_HANDLERS = [
     myConnectedAccountsQuery(variables);
 
     const connectedAccounts = isDefined(variables.filter)
-      ? APP_PREFERENCES_CONNECTED_ACCOUNTS
+      ? USER_OWNED_CONNECTED_ACCOUNTS
       : CONNECTED_ACCOUNTS;
 
     return HttpResponse.json({

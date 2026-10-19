@@ -1,5 +1,5 @@
 import { useMyConnectedAccounts } from '@/settings/accounts/hooks/useMyConnectedAccounts';
-import { APP_PREFERENCES_CONNECTED_ACCOUNTS_FILTER } from '@/settings/app-preferences/constants/AppPreferencesConnectedAccountsFilter';
+import { USER_OWNED_CONNECTED_ACCOUNTS_FILTER } from '@/settings/app-preferences/constants/UserOwnedConnectedAccountsFilter';
 import { groupConnectedAccountsByNativeAccount } from '@/settings/app-preferences/utils/groupConnectedAccountsByNativeAccount';
 import { ConnectedAccountProvider } from 'twenty-shared/types';
 
@@ -13,7 +13,7 @@ const ACCOUNT_GROUP_PROVIDERS: ReadonlySet<ConnectedAccountProvider> = new Set([
 export const useMyAccountGroups = () => {
   const { accounts, loading } = useMyConnectedAccounts({
     providers: ACCOUNT_GROUP_PROVIDERS,
-    filter: APP_PREFERENCES_CONNECTED_ACCOUNTS_FILTER,
+    filter: USER_OWNED_CONNECTED_ACCOUNTS_FILTER,
   });
 
   return {
