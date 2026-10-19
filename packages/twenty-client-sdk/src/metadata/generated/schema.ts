@@ -6619,7 +6619,7 @@ export interface MyConnectedAccountsFilterInput {
 /** Keeps only the app connections with this scope; accounts from other providers are not affected */
 appConnectionScope?: (ConnectedAccountScope | null),
 /** true keeps only the accounts the caller owns; false, null or omitted also keeps the workspace-shared accounts of other members */
-ownedByCaller?: (Scalars['Boolean'] | null)}
+isOwnedByCaller?: (Scalars['Boolean'] | null)}
 
 export interface NativeModelCapabilitiesGenqlSelection{
     twitterSearch?: boolean | number

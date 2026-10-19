@@ -14,7 +14,7 @@ export class MyConnectedAccountsFilterInput {
     description:
       'true keeps only the accounts the caller owns; false, null or omitted also keeps the workspace-shared accounts of other members',
   })
-  ownedByCaller?: boolean | null;
+  isOwnedByCaller?: boolean | null;
 
   @IsEnum(ConnectedAccountScopeEnum)
   @IsOptional()

@@ -4870,7 +4870,7 @@ export type MyConnectedAccountsFilterInput = {
   /** Keeps only the app connections with this scope; accounts from other providers are not affected */
   appConnectionScope?: InputMaybe<ConnectedAccountScope>;
   /** true keeps only the accounts the caller owns; false, null or omitted also keeps the workspace-shared accounts of other members */
-  ownedByCaller?: InputMaybe<Scalars['Boolean']['input']>;
+  isOwnedByCaller?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type NativeModelCapabilities = {

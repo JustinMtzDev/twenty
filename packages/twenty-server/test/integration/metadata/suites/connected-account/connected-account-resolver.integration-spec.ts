@@ -261,9 +261,9 @@ describe('connectedAccountResolver (e2e)', () => {
         expect(accountIds).not.toContain(TIM_PRIVATE_APP_CONNECTION_ID);
       });
 
-      it('should leave out other members workspace-shared accounts when ownedByCaller is true', async () => {
+      it('should leave out other members workspace-shared accounts when isOwnedByCaller is true', async () => {
         const accountIds = await queryMyConnectedAccountIdsAsMember({
-          ownedByCaller: true,
+          isOwnedByCaller: true,
         });
 
         expect(accountIds).toEqual(
@@ -313,7 +313,7 @@ describe('connectedAccountResolver (e2e)', () => {
 
       it('should return the caller own accounts minus workspace-shared app connections for App preferences', async () => {
         const accountIds = await queryMyConnectedAccountIdsAsMember({
-          ownedByCaller: true,
+          isOwnedByCaller: true,
           appConnectionScope: 'USER',
         });
 

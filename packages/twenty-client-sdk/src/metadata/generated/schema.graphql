@@ -3304,7 +3304,7 @@ input MyConnectedAccountsFilterInput {
   """
   true keeps only the accounts the caller owns; false, null or omitted also keeps the workspace-shared accounts of other members
   """
-  ownedByCaller: Boolean
+  isOwnedByCaller: Boolean
 }
 
 type NativeModelCapabilities {

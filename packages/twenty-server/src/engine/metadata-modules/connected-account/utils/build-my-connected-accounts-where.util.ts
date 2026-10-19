@@ -16,10 +16,10 @@ export const buildMyConnectedAccountsWhere = ({
   userWorkspaceId: string;
   filter?: MyConnectedAccountsFilterInput | null;
 }): FindOptionsWhere<ConnectedAccountEntity>[] => {
-  const { ownedByCaller, appConnectionScope } = filter ?? {};
+  const { isOwnedByCaller, appConnectionScope } = filter ?? {};
 
   const ownershipWhere: FindOptionsWhere<ConnectedAccountEntity>[] =
-    ownedByCaller
+    isOwnedByCaller
       ? [{ workspaceId, userWorkspaceId }]
       : buildConnectedAccountUsableByCallerWhere({
           baseWhere: { workspaceId },

@@ -5,6 +5,6 @@ import {
 
 export const USER_OWNED_CONNECTED_ACCOUNTS_FILTER: MyConnectedAccountsFilterInput =
   {
-    ownedByCaller: true,
+    isOwnedByCaller: true,
     appConnectionScope: ConnectedAccountScope.USER,
   };

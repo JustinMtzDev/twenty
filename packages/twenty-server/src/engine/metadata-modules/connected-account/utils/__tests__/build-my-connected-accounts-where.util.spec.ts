@@ -20,12 +20,12 @@ describe('buildMyConnectedAccountsWhere', () => {
     ]);
   });
 
-  it('matches only the caller own accounts when ownedByCaller is true', () => {
+  it('matches only the caller own accounts when isOwnedByCaller is true', () => {
     expect(
       buildMyConnectedAccountsWhere({
         workspaceId: WORKSPACE_ID,
         userWorkspaceId: USER_WORKSPACE_ID,
-        filter: { ownedByCaller: true },
+        filter: { isOwnedByCaller: true },
       }),
     ).toEqual([
       { workspaceId: WORKSPACE_ID, userWorkspaceId: USER_WORKSPACE_ID },
@@ -34,8 +34,8 @@ describe('buildMyConnectedAccountsWhere', () => {
 
   it.each([
     ['a null filter', null],
-    ['explicit null fields', { ownedByCaller: null, appConnectionScope: null }],
-    ['ownedByCaller false', { ownedByCaller: false }],
+    ['explicit null fields', { isOwnedByCaller: null, appConnectionScope: null }],
+    ['isOwnedByCaller false', { isOwnedByCaller: false }],
   ])('matches like no filter with %s', (_, filter) => {
     expect(
       buildMyConnectedAccountsWhere({
@@ -113,7 +113,7 @@ describe('buildMyConnectedAccountsWhere', () => {
       buildMyConnectedAccountsWhere({
         workspaceId: WORKSPACE_ID,
         userWorkspaceId: USER_WORKSPACE_ID,
-        filter: { ownedByCaller: true, appConnectionScope: 'USER' },
+        filter: { isOwnedByCaller: true, appConnectionScope: 'USER' },
       }),
     ).toEqual([
       {
@@ -135,7 +135,7 @@ describe('buildMyConnectedAccountsWhere', () => {
       buildMyConnectedAccountsWhere({
         workspaceId: WORKSPACE_ID,
         userWorkspaceId: USER_WORKSPACE_ID,
-        filter: { ownedByCaller: true, appConnectionScope: 'WORKSPACE' },
+        filter: { isOwnedByCaller: true, appConnectionScope: 'WORKSPACE' },
       }),
     ).toEqual([
       {

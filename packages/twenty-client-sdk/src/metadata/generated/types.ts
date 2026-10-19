@@ -8859,7 +8859,7 @@ export default {
             "appConnectionScope": [
                 143
             ],
-            "ownedByCaller": [
+            "isOwnedByCaller": [
                 4
             ],
             "__typename": [
